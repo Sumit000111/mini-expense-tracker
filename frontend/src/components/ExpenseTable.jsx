@@ -12,6 +12,30 @@ export default function ExpenseTable({ expenses, onEditSelect, onDelete }) {
     return dateStr.substring(0, 10);
   };
 
+  const handleExportCSV = () => {
+    const headers = ['Date', 'Category', 'Amount (INR)', 'Note'];
+    const rows = sortedExpenses.map(exp => [
+      formatDate(exp.date),
+      exp.category,
+      exp.amount,
+      exp.note ? `"${exp.note.replace(/"/g, '""')}"` : ''
+    ]);
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(e => e.join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `expenses_export_${new Date().toISOString().substring(0,10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (sortedExpenses.length === 0) {
     return (
       <div className="card">
@@ -38,15 +62,29 @@ export default function ExpenseTable({ expenses, onEditSelect, onDelete }) {
 
   return (
     <div className="card">
-      <h2>
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-        Expenses ({sortedExpenses.length})
-      </h2>
+      <div className="table-header-row">
+        <h2>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Expenses ({sortedExpenses.length})
+        </h2>
+        <button
+          onClick={handleExportCSV}
+          className="btn-export"
+          title="Export filtered expenses to CSV"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Export CSV
+        </button>
+      </div>
 
       <div className="table-container">
         <table className="table">
