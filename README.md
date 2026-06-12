@@ -1,4 +1,4 @@
-# MINI Expense Tracker
+# Mini Expense Tracker
 
 A full-stack Expense Tracker application built with React, Vite, Node.js, Express, MongoDB Atlas, and Mongoose. The application allows users to track expenses, manage budgets, view spending summaries, and visualize expenses through charts.
 
