@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Utilities', 'Shopping', 'Other'];
 
-export default function ExpenseForm({ onExpenseAdded }) {
+export default function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }) {
   const getTodayString = () => {
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -22,6 +22,25 @@ export default function ExpenseForm({ onExpenseAdded }) {
   const [submitError, setSubmitError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const isEditing = !!editingExpense;
+
+  // Pre-fill form when editingExpense changes
+  useEffect(() => {
+    if (editingExpense) {
+      setAmount(String(editingExpense.amount));
+      setCategory(editingExpense.category);
+      setDate(editingExpense.date.substring(0, 10));
+      setNote(editingExpense.note || '');
+      setErrors({});
+    } else {
+      setAmount('');
+      setCategory('');
+      setDate(getTodayString());
+      setNote('');
+      setErrors({});
+    }
+  }, [editingExpense]);
 
   const validate = () => {
     const newErrors = {};
@@ -65,8 +84,11 @@ export default function ExpenseForm({ onExpenseAdded }) {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/expenses', {
-        method: 'POST',
+      const url = isEditing ? `/api/expenses/${editingExpense._id}` : '/api/expenses';
+      const method = isEditing ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -81,11 +103,10 @@ export default function ExpenseForm({ onExpenseAdded }) {
       const data = await response.json();
 
       if (!response.ok) {
-        // Mongoose validation or general backend failures
-        throw new Error(data.message || 'Failed to add expense');
+        throw new Error(data.message || 'Failed to save expense');
       }
 
-      setSuccessMsg('Expense added successfully!');
+      setSuccessMsg(isEditing ? 'Expense updated successfully!' : 'Expense added successfully!');
 
       // Reset values
       setAmount('');
@@ -94,9 +115,13 @@ export default function ExpenseForm({ onExpenseAdded }) {
       setNote('');
       setErrors({});
 
-      // Callback to alert parent component (e.g. to reload list)
+      // Callback to alert parent component to reload list
       if (onExpenseAdded) {
         onExpenseAdded(data);
+      }
+
+      if (isEditing && onCancelEdit) {
+        onCancelEdit();
       }
 
       // Hide success message after 3 seconds
@@ -113,12 +138,24 @@ export default function ExpenseForm({ onExpenseAdded }) {
   return (
     <div className="card">
       <h2>
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="16"/>
-          <line x1="8" y1="12" x2="16" y2="12"/>
-        </svg>
-        Add Expense
+        {isEditing ? (
+          <>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+            Edit Expense
+          </>
+        ) : (
+          <>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Add Expense
+          </>
+        )}
       </h2>
 
       {submitError && (
@@ -194,8 +231,19 @@ export default function ExpenseForm({ onExpenseAdded }) {
         </div>
 
         <button type="submit" className="btn" disabled={loading}>
-          {loading ? 'Adding...' : 'Add Expense'}
+          {loading ? 'Saving...' : isEditing ? 'Update Expense' : 'Add Expense'}
         </button>
+
+        {isEditing && (
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={onCancelEdit}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+        )}
       </form>
     </div>
   );

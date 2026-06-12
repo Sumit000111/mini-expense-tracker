@@ -239,3 +239,110 @@ select.form-control {
   25% { transform: translateX(-4px); }
   75% { transform: translateX(4px); }
 }
+
+/* Table Styles */
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.table th,
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.table th {
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+
+.table tbody tr {
+  transition: var(--transition);
+}
+
+.table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Category Badge styles */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: rgba(99, 102, 241, 0.1);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+/* Table Actions Button layout */
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  color: var(--text-muted);
+}
+
+.btn-icon:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.btn-icon.edit:hover {
+  color: var(--success);
+}
+
+.btn-icon.delete:hover {
+  color: var(--error);
+}
+
+/* Secondary Button (e.g. Cancel Edit) */
+.btn-secondary {
+  background-color: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--input-border);
+  box-shadow: none;
+  margin-top: 0.5rem;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+/* Empty list placeholder styles */
+.empty-placeholder {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+
+.empty-placeholder svg {
+  margin-bottom: 1rem;
+  opacity: 0.5;
+  color: var(--primary);
+}
+

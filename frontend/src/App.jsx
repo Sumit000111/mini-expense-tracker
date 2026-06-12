@@ -1,13 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ExpenseForm from './components/ExpenseForm';
+import ExpenseTable from './components/ExpenseTable';
 
 export default function App() {
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [expenses, setExpenses] = useState([]);
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const handleExpenseAdded = (newExpense) => {
-    console.log('New expense added:', newExpense);
-    // Incrementing this trigger will help refresh our table/summary in future steps
-    setRefreshTrigger(prev => prev + 1);
+  // Fetch list of expenses from database
+  const fetchExpenses = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await fetch('/api/expenses');
+      if (!response.ok) {
+        throw new Error('Failed to fetch expenses');
+      }
+      const data = await response.json();
+      setExpenses(data);
+    } catch (err) {
+      setError(err.message || 'Something went wrong while loading expenses.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchExpenses();
+  }, []);
+
+  const handleExpenseSaved = () => {
+    fetchExpenses();
+  };
+
+  const handleEditSelect = (expense) => {
+    setEditingExpense(expense);
+    // Scroll window smoothly to the top of the form for better mobile/UX experience
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingExpense(null);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this expense?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/expenses/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to delete');
+      }
+
+      // Re-fetch list
+      fetchExpenses();
+
+      // If the deleted item was currently being edited, cancel edit state
+      if (editingExpense && editingExpense._id === id) {
+        setEditingExpense(null);
+      }
+    } catch (err) {
+      alert(err.message || 'Error deleting expense');
+    }
   };
 
   return (
@@ -17,24 +78,30 @@ export default function App() {
         <p>Manage your daily expenses with style and ease</p>
       </header>
 
-      <div className="dashboard-grid">
-        <ExpenseForm onExpenseAdded={handleExpenseAdded} />
-        
-        <div className="card">
-          <h2>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10 9 9 9 8 9"/>
-            </svg>
-            Expense List (Coming Next)
-          </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            We've set up the server proxy and the form component. In the next step, we will load and display the table of expenses here.
-          </p>
+      {error && (
+        <div className="alert alert-danger" style={{ maxWidth: '600px', margin: '0 auto 2rem auto' }}>
+          <span>{error}</span>
         </div>
+      )}
+
+      <div className="dashboard-grid">
+        <ExpenseForm
+          onExpenseAdded={handleExpenseSaved}
+          editingExpense={editingExpense}
+          onCancelEdit={handleCancelEdit}
+        />
+
+        {loading ? (
+          <div className="card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+            <p style={{ color: 'var(--text-muted)' }}>Loading expenses...</p>
+          </div>
+        ) : (
+          <ExpenseTable
+            expenses={expenses}
+            onEditSelect={handleEditSelect}
+            onDelete={handleDelete}
+          />
+        )}
       </div>
     </div>
   );
