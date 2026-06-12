@@ -5,7 +5,29 @@ const Expense = require('../models/Expense');
 // @access  Public
 const getExpenses = async (req, res) => {
   try {
-    const expenses = await Expense.find().sort({ date: -1 }); // Sort by date newest first
+    const { category, startDate, endDate } = req.query;
+    const query = {};
+
+    // Filter by category if provided
+    if (category) {
+      query.category = category;
+    }
+
+    // Filter by date range if provided
+    if (startDate || endDate) {
+      query.date = {};
+      if (startDate) {
+        query.date.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        // Parse end date and set to end of that day (23:59:59.999)
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        query.date.$lte = end;
+      }
+    }
+
+    const expenses = await Expense.find(query).sort({ date: -1 }); // Sort by date newest first
     res.status(200).json(expenses);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
