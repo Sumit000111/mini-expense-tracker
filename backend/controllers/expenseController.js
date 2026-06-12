@@ -1,0 +1,94 @@
+const Expense = require('../models/Expense');
+
+// @desc    Get all expenses
+// @route   GET /api/expenses
+// @access  Public
+const getExpenses = async (req, res) => {
+  try {
+    const expenses = await Expense.find().sort({ date: -1 }); // Sort by date newest first
+    res.status(200).json(expenses);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Create a new expense
+// @route   POST /api/expenses
+// @access  Public
+const createExpense = async (req, res) => {
+  try {
+    const { amount, category, date, note } = req.body;
+
+    // Create a new expense document
+    const expense = await Expense.create({
+      amount,
+      category,
+      date,
+      note
+    });
+
+    res.status(201).json(expense);
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return res.status(400).json({ message: 'Validation Error', errors: messages });
+    }
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Update an expense
+// @route   PUT /api/expenses/:id
+// @access  Public
+const updateExpense = async (req, res) => {
+  try {
+    const { amount, category, date, note } = req.body;
+
+    // Find and update the expense
+    const expense = await Expense.findById(req.params.id);
+
+    if (!expense) {
+      return res.status(404).json({ message: 'Expense not found' });
+    }
+
+    expense.amount = amount !== undefined ? amount : expense.amount;
+    expense.category = category !== undefined ? category : expense.category;
+    expense.date = date !== undefined ? date : expense.date;
+    expense.note = note !== undefined ? note : expense.note;
+
+    // Save triggers model validations
+    const updatedExpense = await expense.save();
+    res.status(200).json(updatedExpense);
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return res.status(400).json({ message: 'Validation Error', errors: messages });
+    }
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Delete an expense
+// @route   DELETE /api/expenses/:id
+// @access  Public
+const deleteExpense = async (req, res) => {
+  try {
+    const expense = await Expense.findById(req.params.id);
+
+    if (!expense) {
+      return res.status(404).json({ message: 'Expense not found' });
+    }
+
+    await expense.deleteOne();
+    res.status(200).json({ message: 'Expense removed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = {
+  getExpenses,
+  createExpense,
+  updateExpense,
+  deleteExpense
+};
