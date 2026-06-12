@@ -4,6 +4,7 @@ import ExpenseTable from './components/ExpenseTable';
 import FilterBar from './components/FilterBar';
 import ExpenseChart from './components/ExpenseChart';
 import SummaryPanel from './components/SummaryPanel';
+import BudgetPanel from './components/BudgetPanel';
 
 export default function App() {
   const [expenses, setExpenses] = useState([]);
@@ -11,11 +12,24 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [summaryData, setSummaryData] = useState(null);
+  const [budgetData, setBudgetData] = useState({ budgets: [], categorySpent: {} });
   const [filters, setFilters] = useState({
     category: '',
     startDate: '',
     endDate: ''
   });
+
+  const fetchBudgets = async () => {
+    try {
+      const response = await fetch('/api/budgets');
+      if (response.ok) {
+        const data = await response.json();
+        setBudgetData(data);
+      }
+    } catch (err) {
+      console.error('Error fetching budgets:', err);
+    }
+  };
 
   const fetchSummary = async () => {
     try {
@@ -62,11 +76,13 @@ export default function App() {
   useEffect(() => {
     fetchExpenses();
     fetchSummary();
+    fetchBudgets();
   }, []);
 
   const handleExpenseSaved = () => {
     fetchExpenses();
     fetchSummary();
+    fetchBudgets();
   };
 
   const handleFilterChange = (newFilters) => {
@@ -102,6 +118,7 @@ export default function App() {
       // Re-fetch list
       fetchExpenses();
       fetchSummary();
+      fetchBudgets();
 
       // If the deleted item was currently being edited, cancel edit state
       if (editingExpense && editingExpense._id === id) {
@@ -128,11 +145,18 @@ export default function App() {
       <SummaryPanel summaryData={summaryData} />
 
       <div className="dashboard-grid">
-        <ExpenseForm
-          onExpenseAdded={handleExpenseSaved}
-          editingExpense={editingExpense}
-          onCancelEdit={handleCancelEdit}
-        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <ExpenseForm
+            onExpenseAdded={handleExpenseSaved}
+            editingExpense={editingExpense}
+            onCancelEdit={handleCancelEdit}
+          />
+          <BudgetPanel
+            budgets={budgetData.budgets}
+            categorySpent={budgetData.categorySpent}
+            onBudgetUpdated={fetchBudgets}
+          />
+        </div>
 
         <div className="main-content-area" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <FilterBar filters={filters} onFilterChange={handleFilterChange} />

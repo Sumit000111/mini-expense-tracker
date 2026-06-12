@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const expenseRoutes = require('./routes/expenseRoutes');
+const budgetRoutes = require('./routes/budgetRoutes');
 
 // Connect to MongoDB
 connectDB();
@@ -15,6 +16,7 @@ app.use(express.json());  // to parse JSON request bodies
 
 // Register Routes
 app.use('/api/expenses', expenseRoutes);
+app.use('/api/budgets', budgetRoutes);
 
 // Simple root route
 app.get('/', (req, res) => {
