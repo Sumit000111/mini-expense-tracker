@@ -18,7 +18,7 @@ const expenseSchema = new mongoose.Schema(
       default: Date.now,
       validate: {
         validator: function(value) {
-          return value <= new Date(Date.now() + 60000); // 1 minute ka buffer hai while adding expense
+          return value <= new Date(Date.now() + 24 * 60 * 60 * 1000); // 24-hour buffer to handle timezone differences
         },
         message: 'Expense date cannot be in the future'
       }
