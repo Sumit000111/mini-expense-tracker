@@ -346,3 +346,123 @@ select.form-control {
   color: var(--primary);
 }
 
+/* Filter Bar Styles */
+.filter-card {
+  padding: 1.25rem !important;
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.filter-bar .form-group {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 180px;
+}
+
+.btn-reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  font-family: var(--font-family);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  height: 43px; /* align with input height */
+  transition: var(--transition);
+}
+
+.btn-reset:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  transform: translateY(-1px);
+}
+
+.btn-reset:active {
+  transform: translateY(0);
+}
+
+/* Chart Styles */
+.chart-card {
+  padding: 1.5rem !important;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.chart-header h2 {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.chart-toggle-tabs {
+  display: inline-flex;
+  background-color: var(--input-bg);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--input-border);
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+}
+
+.tab-btn.active {
+  background-color: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.chart-tooltip {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--card-border);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  z-index: 100;
+}
+
+.tooltip-label {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.tooltip-value {
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+
+

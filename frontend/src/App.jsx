@@ -1,19 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import ExpenseForm from './components/ExpenseForm';
 import ExpenseTable from './components/ExpenseTable';
+import FilterBar from './components/FilterBar';
+import ExpenseChart from './components/ExpenseChart';
 
 export default function App() {
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [filters, setFilters] = useState({
+    category: '',
+    startDate: '',
+    endDate: ''
+  });
 
   // Fetch list of expenses from database
-  const fetchExpenses = async () => {
+  const fetchExpenses = async (appliedFilters = filters) => {
     try {
       setLoading(true);
       setError('');
-      const response = await fetch('/api/expenses');
+      
+      const queryParams = new URLSearchParams();
+      if (appliedFilters.category) {
+        queryParams.append('category', appliedFilters.category);
+      }
+      if (appliedFilters.startDate) {
+        queryParams.append('startDate', appliedFilters.startDate);
+      }
+      if (appliedFilters.endDate) {
+        queryParams.append('endDate', appliedFilters.endDate);
+      }
+
+      const response = await fetch(`/api/expenses?${queryParams.toString()}`);
       if (!response.ok) {
         throw new Error('Failed to fetch expenses');
       }
@@ -32,6 +51,11 @@ export default function App() {
 
   const handleExpenseSaved = () => {
     fetchExpenses();
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    fetchExpenses(newFilters);
   };
 
   const handleEditSelect = (expense) => {
@@ -91,17 +115,23 @@ export default function App() {
           onCancelEdit={handleCancelEdit}
         />
 
-        {loading ? (
-          <div className="card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-            <p style={{ color: 'var(--text-muted)' }}>Loading expenses...</p>
-          </div>
-        ) : (
-          <ExpenseTable
-            expenses={expenses}
-            onEditSelect={handleEditSelect}
-            onDelete={handleDelete}
-          />
-        )}
+        <div className="main-content-area" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <FilterBar filters={filters} onFilterChange={handleFilterChange} />
+
+          <ExpenseChart expenses={expenses} />
+
+          {loading ? (
+            <div className="card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+              <p style={{ color: 'var(--text-muted)' }}>Loading expenses...</p>
+            </div>
+          ) : (
+            <ExpenseTable
+              expenses={expenses}
+              onEditSelect={handleEditSelect}
+              onDelete={handleDelete}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
