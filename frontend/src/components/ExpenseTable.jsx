@@ -66,7 +66,12 @@ export default function ExpenseTable({ expenses, onEditSelect, onDelete }) {
                 <td>
                   <span className="badge">{expense.category}</span>
                 </td>
-                <td style={{ fontWeight: '600' }}>₹{expense.amount.toFixed(2)}</td>
+                <td style={{ fontWeight: '600' }}>
+                  {new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                  }).format(expense.amount)}
+                </td>
                 <td style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                   {expense.note || '—'}
                 </td>

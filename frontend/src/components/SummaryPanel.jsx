@@ -29,7 +29,10 @@ export default function SummaryPanel({ summaryData }) {
       <div className="summary-card">
         <h3>This Month</h3>
         <div className="summary-val" style={{ color: 'var(--success)' }}>
-          ₹{totalThisMonth.toFixed(2)}
+          {new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+          }).format(totalThisMonth)}
         </div>
         <p>Total spent in current month</p>
       </div>
@@ -40,7 +43,10 @@ export default function SummaryPanel({ summaryData }) {
         {highestExpense ? (
           <>
             <div className="summary-val" style={{ color: 'var(--error)' }}>
-              ₹{highestExpense.amount.toFixed(2)}
+              {new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+              }).format(highestExpense.amount)}
             </div>
             <p>
               In <span className="summary-subtext">{highestExpense.category}</span> on {formatDate(highestExpense.date)}
@@ -70,7 +76,12 @@ export default function SummaryPanel({ summaryData }) {
                   />
                   {cat}
                 </span>
-                <span className="category-summary-value">₹{amount.toFixed(2)}</span>
+                <span className="category-summary-value">
+                  {new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                  }).format(amount)}
+                </span>
               </div>
             ))}
           </div>

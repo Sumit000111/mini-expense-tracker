@@ -3,17 +3,31 @@ import ExpenseForm from './components/ExpenseForm';
 import ExpenseTable from './components/ExpenseTable';
 import FilterBar from './components/FilterBar';
 import ExpenseChart from './components/ExpenseChart';
+import SummaryPanel from './components/SummaryPanel';
 
 export default function App() {
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [summaryData, setSummaryData] = useState(null);
   const [filters, setFilters] = useState({
     category: '',
     startDate: '',
     endDate: ''
   });
+
+  const fetchSummary = async () => {
+    try {
+      const response = await fetch('/api/expenses/summary');
+      if (response.ok) {
+        const data = await response.json();
+        setSummaryData(data);
+      }
+    } catch (err) {
+      console.error('Error fetching summary:', err);
+    }
+  };
 
   // Fetch list of expenses from database
   const fetchExpenses = async (appliedFilters = filters) => {
@@ -47,10 +61,12 @@ export default function App() {
 
   useEffect(() => {
     fetchExpenses();
+    fetchSummary();
   }, []);
 
   const handleExpenseSaved = () => {
     fetchExpenses();
+    fetchSummary();
   };
 
   const handleFilterChange = (newFilters) => {
@@ -85,6 +101,7 @@ export default function App() {
 
       // Re-fetch list
       fetchExpenses();
+      fetchSummary();
 
       // If the deleted item was currently being edited, cancel edit state
       if (editingExpense && editingExpense._id === id) {
@@ -107,6 +124,8 @@ export default function App() {
           <span>{error}</span>
         </div>
       )}
+
+      <SummaryPanel summaryData={summaryData} />
 
       <div className="dashboard-grid">
         <ExpenseForm

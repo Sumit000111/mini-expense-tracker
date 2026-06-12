@@ -51,7 +51,12 @@ export default function ExpenseChart({ expenses }) {
       return (
         <div className="chart-tooltip">
           <p className="tooltip-label">{payload[0].name}</p>
-          <p className="tooltip-value">₹{payload[0].value.toFixed(2)}</p>
+          <p className="tooltip-value">
+            {new Intl.NumberFormat('en-IN', {
+              style: 'currency',
+              currency: 'INR',
+            }).format(payload[0].value)}
+          </p>
         </div>
       );
     }
@@ -97,7 +102,7 @@ export default function ExpenseChart({ expenses }) {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} isAnimationActive={false} />
               <Legend verticalAlign="bottom" height={36} iconType="circle" />
             </PieChart>
           ) : (
@@ -113,9 +118,15 @@ export default function ExpenseChart({ expenses }) {
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `₹${value}`}
+                tickFormatter={(value) =>
+                  new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0,
+                  }).format(value)
+                }
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} isAnimationActive={false} />
               <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
