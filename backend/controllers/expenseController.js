@@ -108,9 +108,55 @@ const deleteExpense = async (req, res) => {
   }
 };
 
+// @desc    Get expense summary (total this month, breakdown per category, highest single)
+// @route   GET /api/expenses/summary
+// @access  Public
+const getExpenseSummary = async (req, res) => {
+  try {
+    const now = new Date();
+    // Start of the current month
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    // End of the current month
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999); // js trick to get last day
+
+    // 1. Total spent this month
+    const monthlyExpenses = await Expense.find({
+      date: { $gte: startOfMonth, $lte: endOfMonth }
+    });
+    const totalThisMonth = monthlyExpenses.reduce((sum, exp) => sum + exp.amount, 0); // added accumulator sum
+
+    // 2. Breakdown per category (all-time)
+    const allExpenses = await Expense.find();
+    const categoryBreakdown = {};
+    allExpenses.forEach(exp => {
+      categoryBreakdown[exp.category] = (categoryBreakdown[exp.category] || 0) + exp.amount;
+    });
+
+    // 3. Highest single expense (all-time)
+    const highestExpense = await Expense.findOne().sort({ amount: -1 });
+
+    res.status(200).json({
+      totalThisMonth,
+      categoryBreakdown,
+      highestExpense: highestExpense
+        ? {
+            id: highestExpense._id,
+            amount: highestExpense.amount,
+            category: highestExpense.category,
+            date: highestExpense.date,
+            note: highestExpense.note
+          }
+        : null
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 module.exports = {
   getExpenses,
   createExpense,
   updateExpense,
-  deleteExpense
+  deleteExpense,
+  getExpenseSummary
 };
